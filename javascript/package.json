@@ -1,6 +1,6 @@
 {
   "name": "@openweb3-io/dex-aggregator",
-  "version": "1.25.13",
+  "version": "1.25.19",
   "description": "dex-aggregator API client and webhook verification library",
   "author": "dex-aggregator",
   "repository": "https://github.com/openweb3-io/dex-aggregator",

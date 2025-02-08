@@ -1,5 +1,7 @@
 import { Centrifuge, ConnectionTokenContext } from "centrifuge";
 import { DexRequestContext } from "..";
+import { TokenActivity, TokenStat } from "./stream.model";
+import { Candle, Resolution } from "../openapi";
 
 
 export interface Unsubscrible {
@@ -33,7 +35,7 @@ export class StreamApi {
     this.realtimeClient.connect();
   }
 
-  subscribe(channel: string, fn: (data: any) => void) {
+  subscribe<T = any>(channel: string, fn: (data: T) => void): Unsubscrible {
     let sub = this.realtimeClient.getSubscription(channel);
     let listeners = this.listenersMap.get(channel);
 
@@ -57,9 +59,11 @@ export class StreamApi {
     }
 
     listeners?.add(fn);
+
+    return new StreamUnsubscrible<T>(this, channel, fn);
   }
 
-  unsubscribe(channel: string, fn: (data: any) => void) {
+  unsubscribe<T = any>(channel: string, fn: (data: T) => void) {
     const listeners = this.listenersMap.get(channel);
     if (!listeners) {
       return;
@@ -79,5 +83,96 @@ export class StreamApi {
 
       this.listenersMap.delete(channel);
     }
+  }
+
+  subscribeTokenCandles({
+    chain,
+    tokenAddress,
+    callback,
+  }: {
+    chain: string;
+    tokenAddress: string;
+    resolution: Resolution;
+    callback: (data: Candle) => void;
+  }): Unsubscrible {
+    const channel = `dex-candle:${chain}_${tokenAddress}`;
+    return this.subscribe(channel, (data: any) => {
+      callback({
+        open: data.o,
+        close: data.c,
+        high: data.h,
+        low: data.l,
+        volume: data.v,
+        resolution: data.r,
+        time: data.t,    
+      });
+    });
+  }
+
+  subscribeTokenStat({
+    chain,
+    tokenAddress,
+    callback,
+  }: {
+    chain: string;
+    tokenAddress: string;
+    callback: (data: TokenStat) => void;
+  }
+): Unsubscrible {
+    const channel = `dex-token-stat:${chain}_${tokenAddress}`;
+    return this.subscribe(channel, callback);
+  }
+
+  subscribeTokenActivities({
+    chain,
+    tokenAddress,
+    callback,
+  }: {
+    chain: string;
+    tokenAddress: string;
+    callback: (data: TokenActivity[]) => void;
+  }): Unsubscrible {
+    const channel = `dex-token-activities:${chain}_${tokenAddress}`;
+    return this.subscribe(channel, callback);
+  }
+
+  subscribeBalance({
+    chain,
+    address,
+    callback,
+  }: {
+    chain: string;
+    address: string;
+    callback: (data: any) => void;
+  }): Unsubscrible {
+    const channel = `dex-balance:${chain}_${address}`;
+    return this.subscribe(channel, callback);
+  }
+
+  subscribeBalanceForToken({
+    chain, 
+    walletAddress,
+    tokenAddress,
+    fn,
+  }: {
+    chain: string;
+    tokenAddress: string;
+    walletAddress: string;
+    fn: (data: any) => void;
+  }): Unsubscrible {
+    const channel = `dex-token-balance:${chain}_${tokenAddress}_${walletAddress}`;
+    return this.subscribe(channel, fn);
+  }
+}
+
+class StreamUnsubscrible<T> {
+  constructor(
+    private readonly streamApi: StreamApi,
+    private readonly channel: string,
+    private readonly fn: (data: T) => void
+  ) {}
+
+  unsubscribe() {
+    this.streamApi.unsubscribe(this.channel, this.fn);
   }
 }
