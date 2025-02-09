@@ -146,7 +146,7 @@ export class StreamApi {
     tokenAddress: string;
     callback: (data: Trade[]) => void;
   }): Unsubscrible {
-    const channel = `dex-trade:${chain}_${tokenAddress}`;
+    const channel = `dex-trades:${chain}_${tokenAddress}`;
     return this.subscribe(channel, callback);
   }
 
