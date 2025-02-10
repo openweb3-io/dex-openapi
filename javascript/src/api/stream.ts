@@ -162,7 +162,7 @@ export class StreamApi {
         // id: ,
         // buyCostUsd: it.,
         tokenAddress: it.a,
-      } as TradeEvent)),
+      } as TradeEvent))
     ));
   }
 
