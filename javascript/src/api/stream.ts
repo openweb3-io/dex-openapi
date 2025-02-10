@@ -1,7 +1,7 @@
 import { Centrifuge, ConnectionTokenContext } from "centrifuge";
 import { DexRequestContext } from "..";
 import { TokenActivity, TokenStat } from "./stream.model";
-import { Candle, Resolution, Trade } from "../openapi";
+import { Candle, Resolution, Trade, TradeEvent } from "../openapi";
 
 
 export interface Unsubscrible {
@@ -144,10 +144,26 @@ export class StreamApi {
   }: {
     chain: string;
     tokenAddress: string;
-    callback: (data: Trade[]) => void;
+    callback: (data: TradeEvent[]) => void;
   }): Unsubscrible {
     const channel = `dex-trades:${chain}_${tokenAddress}`;
-    return this.subscribe(channel, callback);
+    return this.subscribe(channel, (data: any[]) => callback(
+      data?.map((it: any) => ({
+        maker: it.bwa,
+        baseAmount: it.ba,
+        quoteAmount: it.sa,
+        // quoteSymbol: ,
+        quoteAddress: it.swa,
+        amountInUsd: it.bais,
+        timestamp: it.t,
+        event: it.k,
+        txHash: it.h,
+        // priceInUsd: ,
+        // id: ,
+        // buyCostUsd: it.,
+        tokenAddress: it.a,
+      } as TradeEvent)),
+    ));
   }
 
   subscribeBalance({
