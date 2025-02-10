@@ -1,7 +1,7 @@
 import { Centrifuge, ConnectionTokenContext } from "centrifuge";
 import { DexRequestContext } from "..";
 import { TokenActivity, TokenStat } from "./stream.model";
-import { Candle, Resolution, Trade, TradeEvent } from "../openapi";
+import { Candle, Resolution, TradeEvent } from "../openapi";
 
 
 export interface Unsubscrible {
