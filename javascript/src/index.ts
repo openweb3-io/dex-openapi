@@ -38,7 +38,7 @@ const REGIONS = [
   { region: "in", url: "https://api.dex.openweb3.io" },
 ];
 
-export const LIB_VERSION = "1.25.25";
+export const LIB_VERSION = "1.25.27";
 
 class UserAgentMiddleware implements Middleware {
   public pre(context: RequestContext): Promise<RequestContext> {
