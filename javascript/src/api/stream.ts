@@ -120,7 +120,7 @@ export class StreamApi {
     callback: (data: TokenStat) => void;
   }
 ): Unsubscrible {
-    const channel = `dex-token-stat:${chain}_${tokenAddress}`;
+    const channel = `dex-token-stats:${chain}_${tokenAddress}`;
     return this.subscribe(channel, callback);
   }
 
